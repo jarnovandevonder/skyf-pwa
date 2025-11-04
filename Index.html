@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Skyforce Planning">
+<link rel="apple-touch-icon" href="https://checkup.skyforce.be/public/img/logo/skyforce_white.png">
+<link rel="manifest" href="manifest.json">
+
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      height: 100%;
+      width: 100%;
+      color: #ffffff;
+      background: linear-gradient(135deg, #0d1117, #0b1f33, #001f3f);
+      background-size: 400% 400%;
+      animation: gradientMove 20s ease infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @keyframes gradientMove {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    #skyforceLogo {
+      margin: 40px auto 20px auto;
+      max-width: 220px;
+      filter: drop-shadow(0 0 15px rgba(0,255,255,0.5));
+      transition: transform 0.3s ease;
+    }
+    #skyforceLogo:hover { transform: scale(1.05); }
+
+    #signupScreen, #loginScreen, #app, #slotsScreen, #calendarScreen, #adminScreen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 10px 20px;
+      text-align: center;
+    }
+
+    #loginScreen { display: flex; }
+
+    input {
+      width: 90%;
+      max-width: 350px;
+      margin: 10px 0;
+      padding: 12px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(0,255,255,0.5);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    input:focus { background: rgba(0,255,255,0.1); border-color: #00ffe0; }
+
+    button {
+      margin: 10px 0;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      color: #0d1117;
+      background: linear-gradient(90deg, #00ffe0, #0088ff);
+      transition: all 0.3s ease;
+    }
+    button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,255,255,0.5); }
+
+    .whatsappBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(90deg, #25D366, #128C7E);
+      color: #fff;
+      border-radius: 30px;
+      padding: 12px 20px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      margin-top: 12px;
+      box-shadow: 0 0 10px rgba(37,211,102,0.5);
+    }
+    .whatsappBtn:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(37,211,102,0.8); }
+
+    .slotBtn {
+      margin: 6px 4px;
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: 1px solid #00ffe0;
+      background: rgba(255,255,255,0.05);
+      color: #00ffe0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .slotBtn:hover { background: #00ffe0; color: #0d1117; transform: scale(1.05); }
+
+    table {
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 8px;
+      text-align: center;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    th { color: #00ffe0; }
+    .todayCell { background: rgba(0,255,160,0.1); font-weight: bold; }
+    .pastCell { color: #999; font-style: italic; }
+
+    #messageBox {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+      z-index: 9999;
+      backdrop-filter: blur(6px);
+      color: #fff;
+    }
+    #messageBox.info { background: rgba(0,128,255,0.85); }
+    #messageBox.error { background: rgba(255,60,60,0.85); }
+    #messageBox.success { background: rgba(0,200,100,0.85); }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid #00ffe0;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+
+    #calendarScreen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      min-height: 80vh;
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+      background: transparent;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 420px) {
+      input, button, .slotBtn { font-size: 14px; padding: 10px 14px; }
+      table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="messageBox"></div>
+
+<img id="skyforceLogo" src="https://checkup.skyforce.be/public/img/logo/skyforce_white.png" alt="Skyforce Logo">
+
+<div id="loginScreen">
+    <h2>Connexion Représentant</h2>
+    <input type="text" id="repName" placeholder="Votre nom">
+    <input type="password" id="repPass" placeholder="Mot de passe">
+    <button onclick="login()" id="loginBtn">
+      <span id="loginBtnText">Se connecter</span>
+      <span class="spinner" id="loginSpinner" style="display:none;"></span>
+    </button> 
+    <button onclick="showSignUp()" style="background:transparent;color:#00ffe0;text-decoration:underline;padding:0;margin-top:4px;">Créer un compte</button>
+</div>
+
+<div id="signupScreen">
+    <h2>Créer un compte Skyforce</h2>
+    <input type="text" id="newUser" placeholder="Nom d'utilisateur">
+    <input type="password" id="newPass" placeholder="Mot de passe">
+    <input type="email" id="newEmail" placeholder="Email">
+    <button onclick="signup()">S'inscrire</button>
+    <button onclick="showLogin()" style="background:transparent;color:#00ffe0;text-decoration:underline;padding:0;margin-top:4px;">Retour au login</button>
+</div>
+
+<div id="app">
+    <h3>Bienvenue <span id="repBanner"></span></h3>
+    <input type="text" id="dlgPostcode" placeholder="Code postal">
+    <input type="text" id="dlgClient" placeholder="Client (optionnel)">
+    <button onclick="searchSlots()">Rechercher créneaux</button>
+
+    <!-- ✅ admin-knop toegevoegd -->
+    <button id="adminBtn" style="display:none;margin-top:10px;background:#ffaa00" onclick="showAdmin()">📋 Voir les réservations</button>
+</div>
+
+<div id="slotsScreen">
+    <h3>Créneaux disponibles</h3>
+    <div id="slotsArea"><span>Recherche...</span><span class="spinner"></span></div>
+    <div id="resultArea" style="margin-top:10px;color:lightgreen"></div>
+    <button onclick="backToApp()">⟵ Retour</button>
+</div>
+
+<div id="calendarScreen">
+    <h3>Calendrier (2 semaines)</h3>
+    <div id="calendarArea"><span>Chargement du calendrier...</span><span class="spinner"></span></div>
+    <div id="calendarResultArea" style="margin-top:10px;color:lightgreen"></div>
+    <button onclick="closeCalendar()">⟵ Retour</button>
+</div>
+
+<!-- ✅ nieuw admin-scherm -->
+<div id="adminScreen" style="display:none;flex-direction:column;align-items:center;">
+  <h3>📋 Réservations effectuées</h3>
+  <div id="bookingsTable"><span>Chargement...</span><span class="spinner"></span></div>
+  <button onclick="closeAdmin()">⟵ Retour</button>
+</div>
+
+<script>
+
+  // Converteer yyyy-mm-dd (of ISO) naar dd-mm-yyyy
+function formatDateDDMMYYYY(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-'); // [yyyy, mm, dd]
+  if (parts.length !== 3) return dateStr;
+  return parts[2] + '-' + parts[1] + '-' + parts[0];
+}
+
+  function showMessage(text, type = 'info', duration = 3000, withConfirm = false, callback = null) {
+    const box = document.getElementById('messageBox');
+    box.className = type;
+    box.innerHTML = text;
+
+    if (withConfirm) {
+      const okBtn = document.createElement('button');
+      okBtn.textContent = 'Confirmer';
+      okBtn.className = 'btnConfirm btnOk';
+      okBtn.onclick = () => {
+        box.style.display = 'none';
+        if (callback) callback(true);
+      };
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Annuler';
+      cancelBtn.className = 'btnConfirm btnCancel';
+      cancelBtn.onclick = () => {
+        box.style.display = 'none';
+        if (callback) callback(false);
+      };
+      box.appendChild(document.createElement('br'));
+      box.appendChild(okBtn);
+      box.appendChild(cancelBtn);
+    } else if (duration) {
+      setTimeout(() => { box.style.display = 'none'; }, duration);
+    }
+
+    box.style.display = 'block';
+  }
+
+  let currentRep = null;
+  let currentSlots = [];
+  let slotsShown = 0;
+  const slotsPerPage = 4;
+
+  function login() {
+    const rep = document.getElementById('repName').value.trim();
+    const pass = document.getElementById('repPass').value.trim();
+    if (!rep || !pass) return showMessage("Veuillez saisir votre nom et votre mot de passe.", "error");
+
+    const btnText = document.getElementById('loginBtnText');
+    const spinner = document.getElementById('loginSpinner');
+    btnText.style.display = 'none';
+    spinner.style.display = 'inline-block';
+    document.getElementById('loginBtn').disabled = true;
+
+    google.script.run.withSuccessHandler(function(resp) {
+      spinner.style.display = 'none';
+      btnText.style.display = 'inline';
+      document.getElementById('loginBtn').disabled = false;
+
+      if (!resp.success) {
+        showMessage(resp.error || "Connexion invalide.", "error");
+        return;
+      }
+
+      currentRep = rep;
+      document.getElementById('repBanner').textContent = rep;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      showMessage("Connexion réussie ✅", "success");
+
+      // ✅ admin zichtbaar maken als rol admin is
+      if (resp.role === 'admin') {
+        document.getElementById('adminBtn').style.display = 'inline-block';
+      }
+    }).checkLogin(rep, pass);
+  }
+
+  function signup() {
+    const user = document.getElementById('newUser').value.trim();
+    const pass = document.getElementById('newPass').value.trim();
+    const email = document.getElementById('newEmail').value.trim();
+    if(!user || !pass || !email) return showMessage("Remplissez tous les champs", "error");
+
+    google.script.run.withSuccessHandler(function(resp){
+      if(resp.success){
+        showMessage(resp.message, "success");
+        showLogin();
+      } else {
+        showMessage(resp.error, "error");
+      }
+    }).signUp(user, pass, email);
+  }
+
+  function showLogin() {
+    document.getElementById('signupScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+
+  function showSignUp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('signupScreen').style.display = 'flex';
+  }
+
+  function searchSlots() {
+    const postcode = document.getElementById('dlgPostcode').value.trim();
+    if (!postcode) return showMessage('Veuillez entrer un code postal.', "error");
+    document.getElementById('slotsArea').innerHTML = 'Recherche...<span class="spinner"></span>';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('slotsScreen').style.display = 'flex';
+    google.script.run.withSuccessHandler(showSlots).getFreeSlotsWithin72h(postcode);
+  }
+
+  function showSlots(obj) {
+    if (!obj || obj.error) {
+      document.getElementById('slotsArea').innerHTML =
+        '<span style="color:red">' + (obj && obj.error ? obj.error : 'Pas de données') + '</span>';
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const tomorrowIso = tomorrow.getFullYear() + "-" +
+                        String(tomorrow.getMonth() + 1).padStart(2, '0') + "-" +
+                        String(tomorrow.getDate()).padStart(2, '0');
+
+    const validSlots = (obj.slots || []).filter(s => s.date >= tomorrowIso);
+    currentSlots = validSlots;
+    slotsShown = 0;
+
+    const container = document.getElementById('slotsArea');
+    container.innerHTML = '';
+
+    if (!obj.technieker) {
+      container.innerHTML = '<span style="color:red">Aucun Cybersecurity Expert trouvé.</span>';
+      return;
+    }
+    if (currentSlots.length === 0) {
+      container.innerHTML = '<em>Aucun créneau disponible à partir de demain (72h à venir).</em>';
+      return;
+    }
+
+    const title = document.createElement('div');
+    title.innerHTML = '<strong>Cybersecurity Expert: ' + obj.technieker + '</strong>';
+    container.appendChild(title);
+
+    const slotsDiv = document.createElement('div');
+    slotsDiv.style.marginTop = '8px';
+    slotsDiv.id = 'slotsList';
+    container.appendChild(slotsDiv);
+
+    const moreBtn = document.createElement('button');
+    moreBtn.textContent = '➕ Plus de créneaux';
+    moreBtn.style.marginTop = '10px';
+    moreBtn.onclick = function() { renderMoreSlots(obj.technieker); };
+    moreBtn.id = 'moreBtn';
+    container.appendChild(moreBtn);
+
+    const calBtn = document.createElement('button');
+    calBtn.textContent = '📅 Voir calendrier (2 semaines)';
+    calBtn.style.marginTop = '10px';
+    calBtn.style.display = 'none';
+    calBtn.id = 'calendarBtn';
+    calBtn.onclick = function() { renderCalendar(obj.technieker); };
+    container.appendChild(calBtn);
+
+    renderMoreSlots(obj.technieker);
+  }
+
+  function renderMoreSlots(tech) {
+    const slotsDiv = document.getElementById('slotsList');
+    const nextSlots = currentSlots.slice(slotsShown, slotsShown + slotsPerPage);
+
+    nextSlots.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'slotBtn';
+      btn.textContent = formatDateDDMMYYYY(s.date) + ' ' + s.slot;
+      btn.onclick = function() { book(s.date, s.slot); };
+      slotsDiv.appendChild(btn);
+    });
+
+    slotsShown += nextSlots.length;
+
+    const moreBtn = document.getElementById('moreBtn');
+    const calBtn = document.getElementById('calendarBtn');
+
+    if (slotsShown < currentSlots.length) {
+      moreBtn.style.display = 'inline-block';
+    } else {
+      moreBtn.style.display = 'none';
+      calBtn.style.display = 'inline-block';
+    }
+  }
+
+  function renderCalendar(tech) {
+    document.getElementById('slotsScreen').style.display = 'none';
+    document.getElementById('calendarScreen').style.display = 'flex';
+
+    const calDiv = document.getElementById('calendarArea');
+    calDiv.innerHTML = 'Chargement du calendrier...<span class="spinner"></span>';
+
+    const postcode = document.getElementById('dlgPostcode').value.trim();
+    if (!postcode) {
+      calDiv.innerHTML = '<span style="color:red">Veuillez entrer un code postal.</span>';
+      return;
+    }
+
+    google.script.run.withSuccessHandler(function(obj) {
+      if (!obj || obj.error) {
+        calDiv.innerHTML = '<span style="color:red">' + (obj && obj.error ? obj.error : 'Pas de données') + '</span>';
+        return;
+      }
+
+      const weekdays = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+      const today = new Date(); today.setHours(0,0,0,0);
+      const todayIso = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,'0') + "-" + String(today.getDate()).padStart(2,'0');
+      const tmp = new Date(today);
+      const jsDay = tmp.getDay();
+      const diffToMonday = (jsDay === 0) ? -6 : (1 - jsDay);
+      const monday = new Date(tmp); monday.setDate(tmp.getDate() + diffToMonday); monday.setHours(0,0,0,0);
+
+      const dates = [];
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        d.setHours(0,0,0,0);
+        const iso = d.getFullYear() + "-" +
+                    String(d.getMonth()+1).padStart(2,'0') + "-" +
+                    String(d.getDate()).padStart(2,'0');
+        dates.push({ dateObj: d, iso: iso });
+      }
+
+      const grouped = {};
+      (obj.slots || []).forEach(s => {
+        if (!grouped[s.date]) grouped[s.date] = [];
+        grouped[s.date].push(s.slot);
+      });
+
+      let html = '<table>';
+      html += '<tr>';
+      weekdays.forEach(w => html += '<th>' + w + '</th>');
+      html += '</tr>';
+
+      for (let row = 0; row < 2; row++) {
+        html += '<tr>';
+        for (let col = 0; col < 7; col++) {
+          const idx = row * 7 + col;
+          const entry = dates[idx];
+          const d = entry.dateObj;
+          const iso = entry.iso;
+          const cellSlots = grouped[iso] || [];
+
+          const options = { day: '2-digit', month: '2-digit' };
+          const niceDate = d.toLocaleDateString('fr-FR', options);
+          const isToday = (iso === todayIso);
+
+          let tdClass = '';
+          if (d < today) tdClass = 'pastCell';
+          if (isToday) tdClass += (tdClass ? ' ' : '') + 'todayCell';
+
+          html += '<td' + (tdClass ? ' class="'+tdClass+'"' : '') + '>';
+          html += '<div class="calendar-date">' + niceDate + '</div>';
+
+          if (d < today) {
+            html += '<em>Passé</em>';
+          } else if (cellSlots.length > 0) {
+            cellSlots.forEach(slot => {
+              html += '<button class="slotBtn" onclick="book(\''+iso+'\',\''+slot+'\')">'+slot+'</button> ';
+            });
+          } else {
+            html += '<em>Aucun créneau</em>';
+          }
+
+          html += '</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</table>';
+
+      calDiv.innerHTML = html;
+    }).getFreeSlotsForTwoWeeks(postcode);
+  }
+
+  function backToApp() {
+    document.getElementById('slotsScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  }
+
+  function closeCalendar() {
+    document.getElementById('calendarScreen').style.display = 'none';
+    document.getElementById('slotsScreen').style.display = 'flex';
+  }
+
+  function book(date, slot) {
+  const postcode = document.getElementById('dlgPostcode').value.trim();
+  const client = document.getElementById('dlgClient').value.trim();
+
+  showMessage("Confirmez la réservation pour " + date + " (" + slot + ")?", "info", 0, true, function(confirmed) {
+    if (!confirmed) return;
+
+    const slotsResult = document.getElementById('resultArea');
+    const calResult = document.getElementById('calendarResultArea');
+    const activeResult =
+      document.getElementById('slotsScreen').style.display === 'flex'
+        ? slotsResult
+        : calResult;
+
+    // Wis oude inhoud en maak container voor status + WhatsApp
+    activeResult.innerHTML = '';
+    const statusDiv = document.createElement('div');
+    statusDiv.textContent = "Réserver...";
+    const waContainer = document.createElement('div');
+    waContainer.id = 'waContainer';
+    waContainer.style.marginTop = "10px";
+    activeResult.appendChild(statusDiv);
+    activeResult.appendChild(waContainer);
+
+    google.script.run.withSuccessHandler(function(resp) {
+      if (!resp.success) {
+        statusDiv.textContent = "Erreur: " + (resp.error || "Réservation échouée");
+        showMessage(resp.error, "error");
+        return;
+      }
+
+      statusDiv.textContent = "Réservation réussie ✅";
+      showMessage("Réservation réussie ✅", "success");
+
+      if (resp.whatsappUrl) {
+  const waBtn = document.createElement('a');
+  waBtn.href = resp.whatsappUrl;
+  waBtn.target = "_blank";
+  waBtn.className = "whatsappBtn";
+  waBtn.innerHTML = `Ouvrez WhatsApp`;
+  waContainer.appendChild(waBtn);
+}
+    }).bookSlot({ date: date, postcode: postcode, slot: slot, client: client, rep: currentRep });
+  });
+}
+
+
+
+
+
+    /* ✅ nieuwe admin functies */
+  function showAdmin() {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'flex';
+    google.script.run.withSuccessHandler(renderBookings).getAllBookings(currentRep);
+  }
+
+  function renderBookings(rows) {
+    const div = document.getElementById('bookingsTable');
+    if (!rows || rows.length === 0) {
+      div.innerHTML = '<em>Aucune réservation trouvée</em>';
+      return;
+    }
+
+    let html = '<table><tr><th>Date</th><th>Postcode</th><th>Technicien</th><th>Créneau</th><th>Client</th><th>Représentant</th></tr>';
+    rows.forEach(r => {
+      html += `<tr>
+        <td>${r.date}</td>
+        <td>${r.postcode}</td>
+        <td>${r.technieker}</td>
+        <td>${r.slot}</td>
+        <td>${r.klant}</td>
+        <td>${r.vertegenwoordiger}</td>
+      </tr>`;
+    });
+    html += '</table>';
+    div.innerHTML = html;
+  }
+
+  function closeAdmin() {
+    document.getElementById('adminScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  }
+
+// Enter-to-login (login scherm)
+['repName','repPass'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      login();
+    }
+  });
+});
+
+// Enter-to-signup (signup scherm)
+['newUser','newPass','newEmail'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      signup();
+    }
+  });
+});
+
+// Enter-to-search slots (app scherm)
+document.getElementById('dlgPostcode').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    searchSlots();
+  }
+});
+
+</script>
+</body>
+</html>
