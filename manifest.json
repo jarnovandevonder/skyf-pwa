@@ -1,7 +1,7 @@
 {
   "name": "Skyforce Planning",
   "short_name": "Planning",
-  "start_url": "./Index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#001f3f",
   "theme_color": "#0d1117",
@@ -18,4 +18,5 @@
     }
   ]
 }
+
 
